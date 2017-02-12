@@ -3,31 +3,49 @@ import logo from './logo.svg';
 import './App.css';
 
 class Task extends Component {
-  onEdit = (e) => {
-    console.log("edit");
-  };
-
-  onDelete = (e) => {
-    console.log("delete");
-  };
-
   render(props) {
     return (
       <div>
-        <p>{this.props.task}</p> <button onClick={this.onEdit}>edit</button> <button onClick={this.onDelete}>del</button>
+        <p>{this.props.task}</p> <button onClick={this.props.onEdit}>edit</button> <button onClick={this.props.onDelete}>del</button>
       </div>
     );
   }
 }
 
 class List extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      tasks: ['first', 'second', 'third'],
+    };
+  };
+
+  onEdit = (index) => {
+    console.log('index: ' + index)
+  };
+
+  onDelete = (index) => {
+    this.state.tasks.splice(index, 1);
+    this.setState({
+      tasks: this.state.tasks,
+    });
+  };
+
+  addTask = (e) => {
+    console.log('add task');
+  };
+
+  deleteTask = (e) => {
+
+  };
+
   render () {
     return (
       <div>
-        <button>Add task</button>
-        <Task task='first'/>
-        <Task task='second'/>
-        <Task task='third'/>
+        <button onClick={this.addTask}>Add task</button>
+        {this.state.tasks.map((item, index)=>{
+          return <Task task={item} onEdit={function() {this.onEdit(index)}.bind(this)} onDelete={function() {this.onDelete(index)}.bind(this)} key={index}/>
+        })}
       </div>
     );
   }
