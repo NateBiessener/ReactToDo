@@ -12,11 +12,43 @@ class Task extends Component {
   }
 }
 
+class AddTaskForm extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      task: '',
+    };
+  };
+
+  onTaskChange = (e) => {
+    this.setState({task: e.target.value});
+  };
+
+  onSubmit = (e) => {
+    e.preventDefault();
+
+    this.props.onAdd(this.state.task);
+    this.setState({task: ""});
+  };
+
+
+  render() {
+    return (
+      <div>
+        <form onSubmit={this.onSubmit}>
+          <input type="text" value={this.state.task} onChange={this.onTaskChange} />
+          <input type="submit" value="Add Task" />
+        </form>
+      </div>
+    );
+  };
+};
+
 class List extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      tasks: ['first', 'second', 'third'],
+      tasks: [],
     };
   };
 
@@ -31,19 +63,20 @@ class List extends Component {
     });
   };
 
-  addTask = (e) => {
-    console.log('add task');
-  };
-
-  deleteTask = (e) => {
-
+  addTask = (task) => {
+    this.state.tasks.push(task);
+    this.setState({
+      tasks: this.state.tasks,
+    });
   };
 
   render () {
+    let tasks = this.state.tasks;
+
     return (
       <div>
-        <button onClick={this.addTask}>Add task</button>
-        {this.state.tasks.map((item, index)=>{
+        <AddTaskForm onAdd={this.addTask}/>
+        {tasks.map((item, index)=>{
           return <Task task={item} onEdit={function() {this.onEdit(index)}.bind(this)} onDelete={function() {this.onDelete(index)}.bind(this)} key={index}/>
         })}
       </div>
