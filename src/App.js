@@ -6,7 +6,45 @@ class Task extends Component {
   render(props) {
     return (
       <div>
-        <p>{this.props.task}</p> <button onClick={this.props.onEdit}>edit</button> <button onClick={this.props.onDelete}>del</button>
+        {this.props.edit ?
+        <EditTaskForm task={this.props.task} index={this.props.index} onEditSubmit={this.props.onEditSubmit} />
+        :
+        <div>{this.props.task}</div>
+        }
+        <button onClick={this.props.onEdit}>edit</button> <button onClick={this.props.onDelete}>del</button>
+      </div>
+    );
+  }
+}
+
+class EditTaskForm extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      task: this.props.task,
+    };
+  };
+
+  onTaskChange = (e) => {
+    this.setState({task: e.target.value});
+  };
+
+  onSubmit = (e) => {
+    e.preventDefault();
+    this.props.onEditSubmit({
+      task: this.state.task,
+      index: this.props.index,
+    });
+    // this.setState({task: ""});
+  };
+
+  render() {
+    return (
+      <div>
+        <form onSubmit={this.onSubmit}>
+          <input type="text" value={this.state.task} onChange={this.onTaskChange} />
+          <input type="submit" value="Edit Task" />
+        </form>
       </div>
     );
   }
@@ -27,7 +65,10 @@ class AddTaskForm extends Component {
   onSubmit = (e) => {
     e.preventDefault();
 
-    this.props.onAdd(this.state.task);
+    this.props.onAdd({
+      task: this.state.task,
+      edit: false,
+    });
     this.setState({task: ""});
   };
 
@@ -53,7 +94,26 @@ class List extends Component {
   };
 
   onEdit = (index) => {
-    console.log('index: ' + index)
+    //satisfies React's requirement not to directly mutate state... but splice directly changes the tasks array...
+    //will investigate later
+    let newThing = this.state.tasks[index];
+    newThing.edit = !newThing.edit;
+    this.state.tasks.splice(index, 1, newThing);
+    this.setState({
+      tasks: this.state.tasks,
+    });
+  };
+
+  //feel like this should be less ugly, but we have it working at least
+  onEditSubmit = (data) => {
+    let newThing = {
+      task: data.task,
+      edit: false,
+    };
+    this.state.tasks.splice(data.index, 1, newThing);
+    this.setState({
+      tasks: this.state.tasks,
+    });
   };
 
   onDelete = (index) => {
@@ -77,7 +137,12 @@ class List extends Component {
       <div>
         <AddTaskForm onAdd={this.addTask}/>
         {tasks.map((item, index)=>{
-          return <Task task={item} onEdit={function() {this.onEdit(index)}.bind(this)} onDelete={function() {this.onDelete(index)}.bind(this)} key={index}/>
+          return <Task task={item.task} edit={item.edit}
+          onEdit={function() {this.onEdit(index)}.bind(this)}
+          onEditSubmit={this.onEditSubmit}
+          onDelete={function() {this.onDelete(index)}.bind(this)}
+          index={index}
+          key={index}/>
         })}
       </div>
     );
